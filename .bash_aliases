@@ -1,0 +1,6 @@
+alias ..="cd .."
+alias ...="cd ../.."
+alias ll="ls -l"
+alias la="ls -la"
+alias gcloud-reauth="gcloud auth login && gcloud auth application-default login"
+alias git-prune-all="git fetch --all && git remote prune origin && git branch -v | grep -v '^*' | grep '\\[gone\\]' | awk '{print \$1}' | xargs git branch -d"
