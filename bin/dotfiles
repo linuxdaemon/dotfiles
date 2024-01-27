@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+set -e
+
+SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+SCRIPT_NAME="$(basename "$0")"
+DOTFILE_REPO="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
+
+usage() {
+    cat <<EOF
+usage: $SCRIPT_NAME <command>
+
+Commands:
+    setup - Set up dotfiles on the current machine
+    update - Update dotfiles
+    is-update-available - Check for updates, exiting with 0 (success) if there are any available
+EOF
+}
+
+fail() {
+    echo "$*" >&2
+    exit 1
+}
+
+install_dotfile() {
+    file="$1"
+    install_path="$HOME/$file"
+    backup_path="$install_path.old"
+    source="$DOTFILE_REPO/$file"
+    if test -e "$install_path"; then
+        dest="$(readlink -f "$install_path")"
+        if [ "$dest" = "$source" ]; then
+            echo "$file already setup, doing nothing"
+            return 0
+        fi
+        if test -e "$backup_path"; then
+            fail "Backup $backup_path already exists?? stopping"
+        fi
+        mv "$install_path" "$backup_path"
+        echo "$install_path already existed, backup saved to $backup_path"
+    fi
+    ln -s "$source" "$install_path"
+    echo "Installed $file"
+}
+
+do_setup() {
+    echo "Installing dotfiles..."
+    install_dotfile .zshrc
+    install_dotfile .gitconfig
+    install_dotfile .vimrc
+    echo "dotfiles installed."
+}
+
+do_update() {
+    git -C "$DOTFILE_REPO" pull --stat
+    echo "Updated"
+}
+
+check_update() {
+    git -C "$DOTFILE_REPO" fetch --all
+    ! git -C "$DOTFILE_REPO" diff --quiet '@{u}' >/dev/null
+}
+
+if [ $# -lt 1 ]; then
+    usage
+    exit 0
+fi
+
+case "$1" in
+    setup)
+        do_setup
+        ;;
+    update)
+        do_update
+        ;;
+    is-update-available)
+        check_update
+        ;;
+    *)
+        echo "$SCRIPT_NAME: unknown subcommand '$1'" >&2
+        usage >&2
+        exit 1
+esac
