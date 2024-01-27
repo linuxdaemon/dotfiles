@@ -1,3 +1,16 @@
 [user]
 	name = linuxdaemon
 	email = linuxdaemon.irc@gmail.com
+[checkout]
+	defaultRemote = origin
+[commit]
+	gpgSign = true
+[push]
+	autoSetupRemote = true
+	gpgSign = if-asked
+[tag]
+	gpgSign = true
+[init]
+	defaultbranch = main
+[alias]
+	rpull = pull --rebase --autostash --stat
