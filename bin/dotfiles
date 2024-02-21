@@ -21,6 +21,10 @@ fail() {
     exit 1
 }
 
+has_cmd() {
+    type "$1" &>/dev/null
+}
+
 install_dotfile() {
     file="$1"
     install_path="$HOME/$file"
@@ -42,11 +46,23 @@ install_dotfile() {
     echo "Installed $file"
 }
 
+install_omz() {
+        if [ ! -d "$HOME/.oh-my-zsh" ]; then
+            echo "Installing OhMyZSH"
+            sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+        else
+            echo "OhMyZSH already installed, skipping"
+        fi
+
+}
+
 do_setup() {
+    has_cmd zsh && install_omz
+
     echo "Installing dotfiles..."
-    install_dotfile .zshrc
-    install_dotfile .gitconfig
-    install_dotfile .vimrc
+    has_cmd zsh && install_dotfile .zshrc
+    has_cmd git && install_dotfile .gitconfig
+    has_cmd vim && install_dotfile .vimrc
     echo "dotfiles installed."
 }
 

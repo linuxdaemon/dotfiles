@@ -1,4 +1,4 @@
-DOTFILE_REPO="$(dirname "$(readlink -f "$0")")"
+DOTFILE_REPO="$(dirname "$(readlink -f $HOME/.zshrc)")"
 export PATH="$DOTFILE_REPO/bin:$PATH"
 
 # If you come from bash you might have to change your $PATH.
@@ -28,7 +28,7 @@ ZSH_THEME="agnoster"
 
 # Uncomment one of the following lines to change the auto-update behavior
 # zstyle ':omz:update' mode disabled  # disable automatic updates
-# zstyle ':omz:update' mode auto      # update automatically without asking
+zstyle ':omz:update' mode auto      # update automatically without asking
 # zstyle ':omz:update' mode reminder  # just remind me to update when it's time
 
 # Uncomment the following line to change how often to auto-update (in days).
@@ -75,11 +75,6 @@ ZSH_THEME="agnoster"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git)
 
-if type brew &> /dev/null; then
-  # brew exists, try loading completions (requires `brew completions link`)
-  export FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
-fi
-
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
@@ -108,10 +103,56 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-if type brew &>/dev/null; then
-  export PATH="$(brew --prefix)/opt/postgresql@15/bin:$PATH"
+source_if_exists() {
+    file="${1}"
+    if [[ "$file" != /* ]]; then
+        file="$HOME/$file"
+    fi
+    test -f "$file" && source "$file"
+}
+
+add_to_path() {
+    if [ -d "$1" ]; then
+        export PATH="$1:$PATH"
+    fi
+}
+
+has_cmd() {
+    cmd="$1"
+    type "$cmd" &>/dev/null
+}
+
+ibrew_bin="/usr/local/homebrew/bin/brew"
+if has_cmd brew; then
+    if [ -x "$ibrew_bin" ]; then
+        alias ibrew="arch -x86_64 $ibrew_bin"
+    fi
+    alias mbrew='arch -arm64e /opt/homebrew/bin/brew'
+    gcloud_dir="$(mbrew --prefix)/share/google-cloud-sdk"
+    source_if_exists "$gcloud_dir/path.zsh.inc"
+    source_if_exists "$gcloud_dir/completion.zsh.inc"
+    unset gcloud_dir
+
+    if has_cmd ibrew; then
+        FPATH="$(ibrew --prefix)/share/zsh/site-functions:${FPATH}"
+        add_to_path "$(ibrew --prefix)/bin"
+    fi
+
+    if has_cmd mbrew; then
+        FPATH="$(mbrew --prefix)/share/zsh/site-functions:${FPATH}"
+        add_to_path "$(mbrew --prefix)/bin"
+    fi
+
+    autoload -Uz compinit
+    compinit
+
+    add_to_path "$(brew --prefix)/opt/postgresql@15/bin"
+    source_if_exists "$(brew --prefix)/opt/asdf/libexec/asdf.sh"
 fi
 
-test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+source_if_exists ".iterm2_shell_integration.zsh"
 
-PATH="$HOME/Library/Python/3.9/bin:$PATH"
+add_to_path "$HOME/Library/Python/3.9/bin"
+
+unset -f add_to_path source_if_exists has_cmd
+unset DOTFILE_REPO
