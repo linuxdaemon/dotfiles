@@ -122,37 +122,70 @@ has_cmd() {
     type "$cmd" &>/dev/null
 }
 
-ibrew_bin="/usr/local/homebrew/bin/brew"
+# Apple Silicon default brew path
+mbrew_bin="/opt/homebrew/bin/brew"
+
+# Intel default brew path
+ibrew_default_bin="/usr/local/bin/brew"
+
+# Alternate install location for x86 brew on Apple Silicon mac
+ibrew_alt_bin="/usr/local/homebrew/bin/brew"
+
+if [ -x "$ibrew_default_bin" ]; then
+    ibrew_bin= "$ibrew_default_bin"
+else
+    ibrew_bin="$ibrew_alt_bin"
+fi
+
+if [ -x "$ibrew_bin" ]; then
+    alias ibrew="arch -x86_64 $ibrew_bin"
+    FPATH="$(ibrew --prefix)/share/zsh/site-functions:${FPATH}"
+    add_to_path "$(ibrew --prefix)/bin"
+fi
+
+if [ -x "$mbrew_bin" ]; then
+    alias mbrew="arch -arm64e $mbrew_bin"
+    FPATH="$(mbrew --prefix)/share/zsh/site-functions:${FPATH}"
+    add_to_path "$(mbrew --prefix)/bin"
+fi
+
 if has_cmd brew; then
-    if [ -x "$ibrew_bin" ]; then
-        alias ibrew="arch -x86_64 $ibrew_bin"
-    fi
-    alias mbrew='arch -arm64e /opt/homebrew/bin/brew'
-    gcloud_dir="$(mbrew --prefix)/share/google-cloud-sdk"
+    gcloud_dir="$(brew --prefix)/share/google-cloud-sdk"
     source_if_exists "$gcloud_dir/path.zsh.inc"
     source_if_exists "$gcloud_dir/completion.zsh.inc"
     unset gcloud_dir
 
-    if has_cmd ibrew; then
-        FPATH="$(ibrew --prefix)/share/zsh/site-functions:${FPATH}"
-        add_to_path "$(ibrew --prefix)/bin"
-    fi
-
-    if has_cmd mbrew; then
-        FPATH="$(mbrew --prefix)/share/zsh/site-functions:${FPATH}"
-        add_to_path "$(mbrew --prefix)/bin"
-    fi
-
     autoload -Uz compinit
     compinit
 
-    add_to_path "$(brew --prefix)/opt/postgresql@15/bin"
     source_if_exists "$(brew --prefix)/opt/asdf/libexec/asdf.sh"
 fi
+
+brew_get_formula_path() {
+    formula="$1"
+    if ! has_cmd brew; then
+        return 1
+    fi
+    brew --prefix --installed "$formula" 2>/dev/null && return 0
+    has_cmd mbrew && mbrew --prefix --installed "$formula" 2>/dev/null && return 0
+    has_cmd ibrew && ibrew --prefix --installed "$formula" 2>/dev/null && return 0
+    return 1
+}
+
+brew_add_formula_bin() {
+    if ! has_cmd brew; then
+        return
+    fi
+
+    add_to_path "$(brew_get_formula_path "$1")/bin"
+}
+
+brew_add_formula_bin "postgresql@15"
 
 source_if_exists ".iterm2_shell_integration.zsh"
 
 add_to_path "$HOME/Library/Python/3.9/bin"
+add_to_path "$HOME/.local/bin"
 
 unset -f add_to_path source_if_exists has_cmd
 unset DOTFILE_REPO
