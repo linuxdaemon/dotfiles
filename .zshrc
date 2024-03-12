@@ -101,19 +101,17 @@ export EDITOR='vim'
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-source_if_exists() {
-    file="${1}"
-    if [[ "$file" != /* ]]; then
-        file="$HOME/$file"
-    fi
-    test -f "$file" && source "$file"
-}
+DOTFILE_CONFIG="$HOME/.config/dotfiles/repo_path"
 
-add_to_path() {
-    if [ -d "$1" ]; then
-        export PATH="$1${PATH+:$PATH}"
-    fi
-}
+if [ -r "$DOTFILE_CONFIG" ]; then
+    DOTFILE_REPO="$(< "$DOTFILE_CONFIG")"
+else
+    DOTFILE_REPO=""
+    echo "Failed to locate dotfile config, please re-run 'bin/dotfiles setup'" >&2
+    exit 1
+fi
+
+source "$DOTFILE_REPO/lib/common/functions.sh"
 
 brew_get_formula_path() {
     formula="$1"
@@ -136,43 +134,6 @@ brew_add_formula_bin() {
 
     if [[ "$formula_path" != "none" ]]; then
         add_to_path "$formula_path/bin"
-    fi
-}
-
-has_cmd() {
-    type "$1" &>/dev/null
-}
-
-get_platform() {
-    if has_cmd python3; then
-        python3 -c 'import sys; print(sys.platform)'
-    else
-        fail "Python not found, no other methods of detection OS currently implemented"
-    fi
-}
-
-PLATFORM="$(uname)"
-
-is_mac() {
-    [[ "$PLATFORM" = "Darwin" ]]
-}
-
-macos_pre_big_sur() {
-    local vers="$(sw_vers -productversion)"
-    [[ "${vers%%.*}" -lt 11 ]]
-}
-
-get_link_target() {
-    if is_mac; then
-        if type greadlink &>/dev/null; then
-            greadlink -f "$1"
-        elif macos_pre_big_sur; then
-            python3 -c 'import sys;from pathlib import Path;print(Path(sys.argv[1]).resolve())' "$1"
-        else
-            stat -f '%R' "$1"
-        fi
-    else
-        readlink -f "$1"
     fi
 }
 
@@ -257,5 +218,4 @@ add_to_path "$HOME/.local/bin"
 autoload -Uz compinit
 compinit
 
-DOTFILE_REPO="$(dirname "$(get_link_target "$HOME/.zshrc")")"
 add_to_path "$DOTFILE_REPO/bin"

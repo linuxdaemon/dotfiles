@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 set -e
 
 fail() {
@@ -6,34 +6,14 @@ fail() {
     exit 1
 }
 
-PLATFORM="$(uname)"
-
-is_mac() {
-    [[ "$PLATFORM" = "Darwin" ]]
+_get_script_dir() {
+    python3 -c 'from pathlib import Path;print(Path(sys.argv[1]).resolve().parent)' "$0"
 }
 
-macos_pre_big_sur() {
-    local vers="$(sw_vers -productversion)"
-    [[ "${vers%%.*}" -lt 11 ]]
-}
-
-get_link_target() {
-    if is_mac; then
-        if type greadlink &>/dev/null; then
-            greadlink -f "$1"
-        elif macos_pre_big_sur; then
-            python3 -c 'import sys;from pathlib import Path;print(Path(sys.argv[1]).resolve())' "$1"
-        else
-            stat -f '%R' "$1"
-        fi
-    else
-        readlink -f "$1"
-    fi
-}
-
-SCRIPT_DIR="$(dirname "$(get_link_target "$0")")"
+SCRIPT_DIR="$(_get_script_dir)"
 SCRIPT_NAME="$(basename "$0")"
 DOTFILE_REPO="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
+DOTFILE_CONFIG="$HOME/.config/dotfiles/repo_path"
 
 usage() {
     cat <<EOF
@@ -80,8 +60,7 @@ install_brew() {
     if ! has_cmd brew; then
         echo "Installing homebrew"
         bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        # shellcheck disable=SC1091
-        source "$DOTFILE_REPO/.zshrc"
+        eval "$(brew shellenv)"
     else
         echo "homebrew already installed, skipping"
     fi
@@ -94,9 +73,17 @@ install_coreutils_brew() {
     fi
 }
 
+set_config() {
+    local parent
+    parent="$(dirname "$DOTFILE_CONFIG")"
+    [ -d "$parent" ] || mkdir -p "$parent"
+    echo "$DOTFILE_REPO" > "$DOTFILE_CONFIG"
+}
+
 do_setup() {
+    set_config
     # shellcheck disable=SC1091
-    source "$DOTFILE_REPO/.zshrc"
+    source "$DOTFILE_REPO/lib/common/functions.sh"
     has_cmd zsh && install_omz
     is_mac && install_brew
     is_mac && has_cmd brew && install_coreutils_brew
@@ -109,6 +96,7 @@ do_setup() {
 }
 
 do_update() {
+    set_config
     git -C "$DOTFILE_REPO" pull --stat
     echo "Updated"
 }
