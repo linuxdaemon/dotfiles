@@ -1,6 +1,3 @@
-DOTFILE_REPO="$(dirname "$(readlink -f $HOME/.zshrc)")"
-export PATH="$DOTFILE_REPO/bin:$PATH"
-
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
@@ -75,7 +72,7 @@ zstyle ':omz:update' mode auto      # update automatically without asking
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git)
 
-source $ZSH/oh-my-zsh.sh
+source "$ZSH/oh-my-zsh.sh"
 
 # User configuration
 
@@ -90,6 +87,7 @@ source $ZSH/oh-my-zsh.sh
 # else
 #   export EDITOR='mvim'
 # fi
+export EDITOR='vim'
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
@@ -113,13 +111,68 @@ source_if_exists() {
 
 add_to_path() {
     if [ -d "$1" ]; then
-        export PATH="$1:$PATH"
+        export PATH="$1${PATH+:$PATH}"
+    fi
+}
+
+brew_get_formula_path() {
+    formula="$1"
+    if ! has_cmd brew; then
+        return 1
+    fi
+
+    brew --prefix --installed "$formula" 2>/dev/null && return 0
+    has_cmd mbrew && mbrew --prefix --installed "$formula" 2>/dev/null && return 0
+    has_cmd ibrew && ibrew --prefix --installed "$formula" 2>/dev/null && return 0
+    return 1
+}
+
+brew_add_formula_bin() {
+    if ! has_cmd brew; then
+        return
+    fi
+
+    local formula_path="$(brew_get_formula_path "$1" || echo "none")"
+
+    if [[ "$formula_path" != "none" ]]; then
+        add_to_path "$formula_path/bin"
     fi
 }
 
 has_cmd() {
-    cmd="$1"
-    type "$cmd" &>/dev/null
+    type "$1" &>/dev/null
+}
+
+get_platform() {
+    if has_cmd python3; then
+        python3 -c 'import sys; print(sys.platform)'
+    else
+        fail "Python not found, no other methods of detection OS currently implemented"
+    fi
+}
+
+PLATFORM="$(uname)"
+
+is_mac() {
+    [[ "$PLATFORM" = "Darwin" ]]
+}
+
+get_link_target() {
+    if is_mac; then
+        if has_cmd greadlink; then
+            greadlink -f "$1"
+        else
+            stat -f '%R' "$1"
+        fi
+    else
+        readlink -f "$1"
+    fi
+}
+
+ARCH="$(uname -m)"
+
+is_arm() {
+    [[ "$ARCH" = "arm64" ]]
 }
 
 # Apple Silicon default brew path
@@ -137,48 +190,54 @@ else
     ibrew_bin="$ibrew_alt_bin"
 fi
 
-if [ -x "$ibrew_bin" ]; then
-    alias ibrew="arch -x86_64 $ibrew_bin"
-    FPATH="$(ibrew --prefix)/share/zsh/site-functions:${FPATH}"
-    add_to_path "$(ibrew --prefix)/bin"
+add_homebrew() {
+    local path="$1"
+    local arch="$2"
+    local alias_name="$3"
+    if [ -n "$alias_name" ]; then
+        alias ibrew="arch -x86_64 $path"
+    fi
+    eval "$($path shellenv zsh)"
+    FPATH="$HOMEBREW_PREFIX/share/zsh/site-functions${FPATH+:$FPATH}"
+}
+
+add_ibrew() {
+    if [ -x "$ibrew_bin" ]; then
+        alias ibrew="arch -x86_64 $ibrew_bin"
+        eval "$(ibrew shellenv zsh)"
+        FPATH="$HOMEBREW_PREFIX/share/zsh/site-functions${FPATH+:$FPATH}"
+    fi
+}
+
+add_mbrew() {
+    if [ -x "$mbrew_bin" ]; then
+        alias mbrew="arch -arm64e $mbrew_bin"
+        eval "$(mbrew shellenv zsh)"
+        FPATH="$HOMEBREW_PREFIX/share/zsh/site-functions${FPATH+:$FPATH}"
+    fi
+}
+
+if is_arm; then
+    add_ibrew
+    add_mbrew
+else
+    add_ibrew
 fi
 
-if [ -x "$mbrew_bin" ]; then
-    alias mbrew="arch -arm64e $mbrew_bin"
-    FPATH="$(mbrew --prefix)/share/zsh/site-functions:${FPATH}"
-    add_to_path "$(mbrew --prefix)/bin"
-fi
+unset ibrew_bin mbrew_bin ibrew_default_bin mbrew_default_bin
 
 if has_cmd brew; then
-    gcloud_dir="$(brew --prefix)/share/google-cloud-sdk"
+    gcloud_dir="$HOMEBREW_PREFIX/share/google-cloud-sdk"
     source_if_exists "$gcloud_dir/path.zsh.inc"
     source_if_exists "$gcloud_dir/completion.zsh.inc"
     unset gcloud_dir
 
-    autoload -Uz compinit
-    compinit
-
-    source_if_exists "$(brew --prefix)/opt/asdf/libexec/asdf.sh"
+    asdf_path="$(brew_get_formula_path asdf || echo "none")"
+    if [[ "$asdf_path" != "none" ]]; then
+        source_if_exists "$asdf_path/libexec/asdf.sh"
+    fi
+    unset asdf_path
 fi
-
-brew_get_formula_path() {
-    formula="$1"
-    if ! has_cmd brew; then
-        return 1
-    fi
-    brew --prefix --installed "$formula" 2>/dev/null && return 0
-    has_cmd mbrew && mbrew --prefix --installed "$formula" 2>/dev/null && return 0
-    has_cmd ibrew && ibrew --prefix --installed "$formula" 2>/dev/null && return 0
-    return 1
-}
-
-brew_add_formula_bin() {
-    if ! has_cmd brew; then
-        return
-    fi
-
-    add_to_path "$(brew_get_formula_path "$1")/bin"
-}
 
 brew_add_formula_bin "postgresql@15"
 
@@ -187,5 +246,9 @@ source_if_exists ".iterm2_shell_integration.zsh"
 add_to_path "$HOME/Library/Python/3.9/bin"
 add_to_path "$HOME/.local/bin"
 
-unset -f add_to_path source_if_exists has_cmd
-unset DOTFILE_REPO
+# We finished init, set up completions
+autoload -Uz compinit
+compinit
+
+DOTFILE_REPO="$(dirname "$(get_link_target "$HOME/.zshrc")")"
+add_to_path "$DOTFILE_REPO/bin"

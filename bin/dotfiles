@@ -1,7 +1,30 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 set -e
 
-SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+fail() {
+    echo "$*" >&2
+    exit 1
+}
+
+PLATFORM="$(uname)"
+
+is_mac() {
+    [[ "$PLATFORM" = "Darwin" ]]
+}
+
+get_link_target() {
+    if is_mac; then
+        if type greadlink &>/dev/null; then
+            greadlink -f "$1"
+        else
+            stat -f '%R' "$1"
+        fi
+    else
+        readlink -f "$1"
+    fi
+}
+
+SCRIPT_DIR="$(dirname "$(get_link_target "$0")")"
 SCRIPT_NAME="$(basename "$0")"
 DOTFILE_REPO="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
 
@@ -16,22 +39,13 @@ Commands:
 EOF
 }
 
-fail() {
-    echo "$*" >&2
-    exit 1
-}
-
-has_cmd() {
-    type "$1" &>/dev/null
-}
-
 install_dotfile() {
     file="$1"
     install_path="$HOME/$file"
     backup_path="$install_path.old"
     source="$DOTFILE_REPO/$file"
     if test -e "$install_path"; then
-        dest="$(readlink -f "$install_path")"
+        dest="$(get_link_target "$install_path")"
         if [ "$dest" = "$source" ]; then
             echo "$file already setup, doing nothing"
             return 0
@@ -47,17 +61,38 @@ install_dotfile() {
 }
 
 install_omz() {
-        if [ ! -d "$HOME/.oh-my-zsh" ]; then
-            echo "Installing OhMyZSH"
-            sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-        else
-            echo "OhMyZSH already installed, skipping"
-        fi
+    if [ ! -d "$HOME/.oh-my-zsh" ]; then
+        echo "Installing OhMyZSH"
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    else
+        echo "OhMyZSH already installed, skipping"
+    fi
+}
 
+install_brew() {
+    if ! has_cmd brew; then
+        echo "Installing homebrew"
+        bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        # shellcheck disable=SC1091
+        source "$DOTFILE_REPO/.zshrc"
+    else
+        echo "homebrew already installed, skipping"
+    fi
+}
+
+install_coreutils_brew() {
+    if ! brew --prefix --installed coreutils &>/dev/null; then
+        echo "Installing coreutils through brew..."
+        brew install coreutils
+    fi
 }
 
 do_setup() {
+    # shellcheck disable=SC1091
+    source "$DOTFILE_REPO/.zshrc"
     has_cmd zsh && install_omz
+    is_mac && install_brew
+    is_mac && has_cmd brew && install_coreutils_brew
 
     echo "Installing dotfiles..."
     has_cmd zsh && install_dotfile .zshrc
