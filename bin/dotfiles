@@ -7,7 +7,7 @@ fail() {
 }
 
 _get_script_dir() {
-    python3 -c 'from pathlib import Path;print(Path(sys.argv[1]).resolve().parent)' "$0"
+    python3 -c 'import sys;from pathlib import Path;print(Path(sys.argv[1]).resolve().parent)' "$0"
 }
 
 SCRIPT_DIR="$(_get_script_dir)"
