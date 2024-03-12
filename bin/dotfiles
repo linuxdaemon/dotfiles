@@ -12,10 +12,17 @@ is_mac() {
     [[ "$PLATFORM" = "Darwin" ]]
 }
 
+macos_pre_big_sur() {
+    local vers="$(sw_vers -productversion)"
+    [[ "${vers%%.*}" -lt 11 ]]
+}
+
 get_link_target() {
     if is_mac; then
         if type greadlink &>/dev/null; then
             greadlink -f "$1"
+        elif macos_pre_big_sur; then
+            python3 -c 'import sys;from pathlib import Path;print(Path(sys.argv[1]).resolve())' "$1"
         else
             stat -f '%R' "$1"
         fi
