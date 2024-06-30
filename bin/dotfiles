@@ -89,7 +89,7 @@ do_setup() {
     is_mac && has_cmd brew && install_coreutils_brew
 
     echo "Installing dotfiles..."
-    has_cmd zsh && install_dotfile .zshrc
+    has_cmd zsh && install_dotfile .zshrc && install_dotfile .zprofile
     has_cmd git && install_dotfile .gitconfig
     has_cmd vim && install_dotfile .vimrc
     echo "dotfiles installed."
