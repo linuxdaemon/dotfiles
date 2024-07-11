@@ -101,18 +101,6 @@ export EDITOR='vim'
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-DOTFILE_CONFIG="$HOME/.config/dotfiles/repo_path"
-
-if [ -r "$DOTFILE_CONFIG" ]; then
-    export DOTFILE_REPO="$(< "$DOTFILE_CONFIG")"
-else
-    export DOTFILE_REPO=""
-    echo "Failed to locate dotfile config, please re-run 'bin/dotfiles setup'" >&2
-    exit 1
-fi
-
-source "$DOTFILE_REPO/lib/common/functions.sh"
-
 # source_if_exists "$HOMEBREW_PREFIX/opt/asdf/libexec/asdf.sh"
 source_if_exists ".iterm2_shell_integration.zsh"
 
@@ -124,3 +112,5 @@ hash -d Code="$HOME/Library/CloudStorage/SynologyDrive-1/Documents/Code"
 # We finished init, set up completions
 autoload -Uz compinit
 compinit
+
+source_if_exists "$HOME/.zshrc.local"

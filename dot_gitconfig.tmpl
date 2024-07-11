@@ -1,6 +1,6 @@
 [user]
-	name = linuxdaemon
-	email = linuxdaemon.irc@gmail.com
+	name = {{ .git_name }}
+	email = {{ .email }}
 [checkout]
 	defaultRemote = origin
 [commit]
@@ -19,3 +19,7 @@
 	process = git-lfs filter-process
 	required = true
 	clean = git-lfs clean -- %f
+{{ with .git_hooks_path -}}
+[core]
+	hooksPath = {{ . }}
+{{ end -}}
