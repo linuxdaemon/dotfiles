@@ -1,3 +1,4 @@
+source {{ joinPath .chezmoi.sourceDir "lib" "common" "functions.sh" | quote }}
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
@@ -113,4 +114,4 @@ hash -d Code="$HOME/Library/CloudStorage/SynologyDrive-1/Documents/Code"
 autoload -Uz compinit
 compinit
 
-source_if_exists "$HOME/.zshrc.local"
+source_if_exists ".zshrc.local"

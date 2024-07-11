@@ -3,6 +3,6 @@
 {{ $git_hooks_path := promptStringOnce . "git_hooks_path" "Custom core Git hooks path" -}}
 
 [data]
-email = {{ $email | quote }}
-git_name = {{ $git_name | quote }}
-git_hooks_path = {{ $git_hooks_path | quote }}
+    email = {{ $email | quote }}
+    git_name = {{ $git_name | quote }}
+    git_hooks_path = {{ $git_hooks_path | quote }}
