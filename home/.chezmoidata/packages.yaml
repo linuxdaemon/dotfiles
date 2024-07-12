@@ -1,4 +1,8 @@
 packages:
+  zsh:
+    platforms:
+      - darwin
+      - linux
   git:
     platforms:
       - darwin
