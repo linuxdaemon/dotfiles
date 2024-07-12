@@ -1,8 +1,20 @@
 {{ $email := promptStringOnce . "email" "Email Address (Git, GPG, etc.)" -}}
 {{ $git_name := promptStringOnce . "git_name" "Name to use for git actions" -}}
 {{ $git_hooks_path := promptStringOnce . "git_hooks_path" "Custom core Git hooks path" -}}
+{{ $gui := promptBoolOnce . "gui" "Enable GUI options?" -}}
+{{ $defaultPkgType := "brew" -}}
+{{ if eq .chezmoi.os "linux" -}}
+{{ $defaultPkgType = "apt" -}}
+{{ end -}}
+{{ $useLinuxBrew := false -}}
+{{ if eq .chezmoi.os "linux" -}}
+{{ $useLinuxBrew = promptBoolOnce . "useLinuxBrew" "Use LinuxBrew?" -}}
+{{ end -}}
 
 [data]
     email = {{ $email | quote }}
     git_name = {{ $git_name | quote }}
     git_hooks_path = {{ $git_hooks_path | quote }}
+    gui = {{ $gui }}
+    defaultPkgType = {{ $defaultPkgType | quote }}
+    useLinuxBrew = {{ $useLinuxBrew }}

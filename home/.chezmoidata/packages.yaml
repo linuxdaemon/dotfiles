@@ -1,0 +1,28 @@
+packages:
+  git:
+    platforms:
+      - darwin
+      - linux
+  jq:
+    platforms:
+      - darwin
+      - linux
+  yq:
+    platforms:
+      - darwin
+      - linux
+  pinentry-mac:
+    platforms:
+      - darwin
+  pipx:
+    platforms:
+      - darwin
+      - linux
+  visual-studio-code:
+    platforms:
+      - darwin
+      - linux
+    overrides:
+      darwin:
+        type: cask
+    guiOnly: true

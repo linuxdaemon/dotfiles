@@ -1,0 +1,20 @@
+{{ if or (eq .chezmoi.os "darwin") (and (eq .chezmoi.os "linux") .useLinuxBrew) -}}
+#!/bin/bash
+
+brew bundle --no-lock --file=/dev/stdin <<EOF
+{{ range $name, $pkg := .packages -}}
+{{ if mustHas $.chezmoi.os $pkg.platforms -}}
+{{ with dig "overrides" $.chezmoi.os "" $pkg -}}
+{{ $pkg = mustMergeOverwrite $pkg . -}}
+{{ end -}}
+{{ $pkgType := dig "type" $.defaultPkgType $pkg -}}
+{{ $pkgName := dig "name" $name $pkg -}}
+{{ if eq $pkgType "brew" -}}
+brew {{ $pkgName | quote }}
+{{ else if eq $pkgType "cask" -}}
+cask {{ $pkgName | quote }}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+EOF
+{{ end -}}
