@@ -12,5 +12,8 @@ export JAVA_HOME="$(/usr/libexec/java_home -v 1.8.0)"
 if [[ -n $SSH_CONNECTION ]]; then
   export EDITOR='vim'
 else
-  export EDITOR='code'
+  export EDITOR='code --wait'
 fi
+
+export GIT_EDITOR="$EDITOR"
+export VISUAL="$EDITOR"

@@ -25,10 +25,6 @@ has_cmd() {
     type "$1" &>/dev/null
 }
 
-vscode_wait() {
-    code --wait $*
-}
-
 todo() {
     $EDITOR "$HOME/Documents/todo.md"
 }
