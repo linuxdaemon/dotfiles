@@ -81,3 +81,7 @@ fi
 
 add_to_path "$HOME/Library/Python/3.9/bin"
 add_to_path "$HOME/.local/bin"
+
+if has_cmd direnv; then
+    eval "$(direnv hook zsh)"
+fi

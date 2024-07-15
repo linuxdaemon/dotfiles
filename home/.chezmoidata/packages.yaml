@@ -30,3 +30,7 @@ packages:
       darwin:
         type: cask
     guiOnly: true
+  direnv:
+    platforms:
+      - darwin
+      - linux
