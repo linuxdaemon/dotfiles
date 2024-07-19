@@ -1,5 +1,5 @@
 [user]
-	name = {{ .git_name }}
+	name = {{ .gitName }}
 	email = {{ .email }}
 [checkout]
 	defaultRemote = origin
@@ -19,7 +19,7 @@
 	process = git-lfs filter-process
 	required = true
 	clean = git-lfs clean -- %f
-{{ with .git_hooks_path -}}
+{{ with .gitHooksPath -}}
 [core]
 	hooksPath = {{ . }}
 {{ end -}}
