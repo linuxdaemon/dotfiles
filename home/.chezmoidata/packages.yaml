@@ -11,6 +11,14 @@ packages:
     platforms:
       - darwin
       - linux
+  font-hack:
+    platforms:
+      - darwin
+      - linux
+    overrides:
+      darwin:
+        type: cask
+    guiOnly: true
   yq:
     platforms:
       - darwin
