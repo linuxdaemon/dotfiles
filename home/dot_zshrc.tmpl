@@ -104,15 +104,94 @@ export VISUAL="$EDITOR"
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+{{ if $.gui -}}
 source_if_exists ".iterm2_shell_integration.zsh"
+{{ end -}}
 
-add_to_path "${KREW_ROOT:-$HOME/.krew}/bin"
-
+{{ if has "personal" $.tags -}}
 hash -d Documents="$HOME/Library/CloudStorage/SynologyDrive-1/Documents"
 hash -d Code="$HOME/Library/CloudStorage/SynologyDrive-1/Documents/Code"
+{{ end -}}
 
-# We finished init, set up completions
+brew_get_formula_path() {
+    local formula="$1"
+    if ! has_cmd brew; then
+        return 1
+    fi
+
+    brew --prefix --installed "$formula" 2>/dev/null && return 0
+    has_cmd mbrew && mbrew --prefix --installed "$formula" 2>/dev/null && return 0
+    has_cmd ibrew && ibrew --prefix --installed "$formula" 2>/dev/null && return 0
+    return 1
+}
+
+brew_add_formula_bin() {
+    if ! has_cmd brew; then
+        return
+    fi
+
+    local formula_path="$(brew_get_formula_path "$1" || echo "none")"
+
+    if [[ "$formula_path" != "none" ]]; then
+        add_to_path "$formula_path/bin"
+    fi
+}
+
+# Apple Silicon default brew path
+mbrew_bin="/opt/homebrew/bin/brew"
+
+# Intel default brew path
+ibrew_default_bin="/usr/local/bin/brew"
+
+# Alternate install location for x86 brew on Apple Silicon mac
+ibrew_alt_bin="/usr/local/homebrew/bin/brew"
+
+if [ -x "$ibrew_default_bin" ]; then
+    ibrew_bin= "$ibrew_default_bin"
+else
+    ibrew_bin="$ibrew_alt_bin"
+fi
+
+add_ibrew() {
+    if [ -x "$ibrew_bin" ]; then
+        alias ibrew="arch -x86_64 $ibrew_bin"
+        eval "$(ibrew shellenv zsh)"
+        export FPATH="$HOMEBREW_PREFIX/share/zsh/site-functions${FPATH+:$FPATH}"
+    fi
+}
+
+add_mbrew() {
+    if [ -x "$mbrew_bin" ]; then
+        alias mbrew="arch -arm64e $mbrew_bin"
+        eval "$(mbrew shellenv zsh)"
+        export FPATH="$HOMEBREW_PREFIX/share/zsh/site-functions${FPATH+:$FPATH}"
+    fi
+}
+
+{{ if eq $.chezmoi.arch "arm64" -}}
+add_ibrew
+add_mbrew
+{{ else -}}
+add_ibrew
+{{ end -}}
+
+unset ibrew_bin mbrew_bin ibrew_default_bin mbrew_default_bin
+
+if has_cmd brew; then
+    gcloud_dir="$HOMEBREW_PREFIX/share/google-cloud-sdk"
+    source_if_exists "$gcloud_dir/path.zsh.inc"
+    source_if_exists "$gcloud_dir/completion.zsh.inc"
+    unset gcloud_dir
+
+    source_if_exists "$HOMEBREW_PREFIX/opt/asdf/libexec/asdf.sh"
+fi
+
+if has_cmd direnv; then
+    eval "$(direnv hook zsh)"
+fi
+
+{{ include (joinPath $.chezmoi.homeDir ".zshrc.local") -}}
+
+# We finished init, set up completions (OMZ does this above, but we add our own, so do it again)
 autoload -Uz compinit
 compinit
-
-source_if_exists ".zshrc.local"
