@@ -1,5 +1,5 @@
 source {{ joinPath .chezmoi.sourceDir "lib" "common" "functions.sh" | quote }}
 
-add_to_path "$HOME/Library/Python/3.9/bin"
-add_to_path "$HOME/.local/bin"
+add_to_path_always "$HOME/Library/Python/3.9/bin"
+add_to_path_always "$HOME/.local/bin"
 add_to_path "${KREW_ROOT:-$HOME/.krew}/bin"

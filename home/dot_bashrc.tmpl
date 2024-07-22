@@ -1,11 +1,11 @@
 source {{ joinPath .chezmoi.sourceDir "lib" "common" "functions.sh" | quote }}
 
-add_to_path "$HOME/bin"
+add_to_path_always "$HOME/bin"
 
 export CLICOLOR="on"
 export PS1="\u@\h:\e[0;34m\w\e[m\n\$ "
 
-source_if_exists ".bash_aliases"
+source_if_exists ".aliases"
 
 export JAVA_HOME="$(/usr/libexec/java_home -v 1.8.0)"
 

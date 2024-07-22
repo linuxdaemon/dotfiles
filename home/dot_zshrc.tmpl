@@ -104,6 +104,8 @@ export VISUAL="$EDITOR"
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+source_if_exists .aliases
+
 {{ if $.gui -}}
 source_if_exists ".iterm2_shell_integration.zsh"
 {{ end -}}
