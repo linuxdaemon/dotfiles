@@ -1,0 +1,7 @@
+{{ if .gui -}}
+#!/bin/bash
+{{ if eq .chezmoi.os "darwin" -}}
+defaults write com.googlecode.iterm2.plist PrefsCustomFolder -string {{ joinPath .chezmoi.sourceDir ".." "iterm2_settings" | quote }}
+defaults write com.googlecode.iterm2.plist LoadPrefsFromCustomFolder -bool true
+{{ end -}}
+{{ end -}}

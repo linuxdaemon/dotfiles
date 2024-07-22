@@ -7,6 +7,13 @@ packages:
     platforms:
       - darwin
       - linux
+  iterm2:
+    platforms:
+      - darwin
+    overrides:
+      darwin:
+        type: cask
+    guiOnly: true
   jq:
     platforms:
       - darwin
