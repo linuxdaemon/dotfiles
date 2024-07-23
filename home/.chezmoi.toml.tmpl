@@ -1,21 +1,33 @@
 {{ $email := promptStringOnce . "email" "Email Address (Git, GPG, etc.)" -}}
 {{ $gitName := promptStringOnce . "gitName" "Name to use for git actions" -}}
 {{ $gitHooksPath := promptStringOnce . "gitHooksPath" "Custom core Git hooks path" -}}
-{{ $gui := promptBoolOnce . "gui" "Enable GUI options?" -}}
+{{ $gui := promptBoolOnce . "gui" "Enable GUI options" -}}
 {{ $defaultPkgType := "brew" -}}
 {{ if eq .chezmoi.os "linux" -}}
 {{ $defaultPkgType = "apt" -}}
 {{ end -}}
 {{ $useLinuxBrew := false -}}
 {{ if eq .chezmoi.os "linux" -}}
-{{ $useLinuxBrew = promptBoolOnce . "useLinuxBrew" "Use LinuxBrew?" -}}
+{{ $useLinuxBrew = promptBoolOnce . "useLinuxBrew" "Use LinuxBrew" -}}
+{{ end -}}
+
+{{ $brewPrefix := "" -}}
+{{ if eq .chezmoi.os "darwin" -}}
+{{   if eq .chezmoi.arch "arm64" -}}
+{{     $brewPrefix = "/opt/homebrew" -}}
+{{   else -}}
+{{     $brewPrefix = "/usr/local" -}}
+{{   end -}}
+{{ else if and (eq .chezmoi.os "linux") $useLinuxBrew -}}
+{{   $brewPrefix = "/home/linuxbrew/.linuxbrew" -}}
 {{ end -}}
 
 [data]
-    email = {{ $email | quote }}
-    gitName = {{ $gitName | quote }}
-    gitHooksPath = {{ $gitHooksPath | quote }}
-    gui = {{ $gui }}
-    defaultPkgType = {{ $defaultPkgType | quote }}
-    useLinuxBrew = {{ $useLinuxBrew }}
-    tags = {{ get $ "tags" | default list | toToml -}}
+    email = {{ $email | toToml }}
+    gitName = {{ $gitName | toToml }}
+    gitHooksPath = {{ $gitHooksPath | toToml }}
+    gui = {{ $gui | toToml }}
+    defaultPkgType = {{ $defaultPkgType | toToml }}
+    useLinuxBrew = {{ $useLinuxBrew | toToml }}
+    tags = {{ get $ "tags" | default list | toToml }}
+    brewPrefix = {{ $brewPrefix | toToml }}
