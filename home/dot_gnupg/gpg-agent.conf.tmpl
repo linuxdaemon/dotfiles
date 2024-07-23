@@ -1,0 +1,3 @@
+{{ if and (eq .chezmoi.os "darwin") .gui -}}
+pinentry-program {{ joinPath .brewPrefix "bin" "pinentry-mac" }}
+{{ end -}}
