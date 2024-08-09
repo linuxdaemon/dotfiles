@@ -8,7 +8,7 @@ source_if_exists() {
         file="$HOME/$file"
     fi
 
-    test -f "$file" && source "$file"
+    test -e "$file" && source "$file"
 }
 
 add_to_path() {
