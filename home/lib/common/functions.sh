@@ -26,5 +26,5 @@ has_cmd() {
 }
 
 todo() {
-    $EDITOR "$HOME/Documents/todo.md"
+    eval $EDITOR "$HOME/Documents/todo.md"
 }
