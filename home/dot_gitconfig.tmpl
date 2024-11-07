@@ -13,7 +13,7 @@
 [init]
 	defaultbranch = main
 [alias]
-	rpull = pull --rebase --autostash --stat
+	rpull = pull --rebase --autostash --stat --gpg-sign
 [filter "lfs"]
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
