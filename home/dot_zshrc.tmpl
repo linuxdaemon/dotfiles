@@ -130,6 +130,9 @@ if has_cmd direnv; then
     eval "$(direnv hook zsh)"
 fi
 
+# Krew
+add_to_path "${KREW_ROOT:-$HOME/.krew}/bin"
+
 {{ template "includeIfExists.tmpl" (joinPath $.chezmoi.homeDir ".zshrc.local") -}}
 
 # We finished init, set up completions (OMZ does this above, but we add our own, so do it again)
