@@ -4,11 +4,11 @@
 {{ $gui := promptBoolOnce . "gui" "Enable GUI options" -}}
 {{ $defaultPkgType := "brew" -}}
 {{ if eq .chezmoi.os "linux" -}}
-{{ $defaultPkgType = "apt" -}}
+{{   $defaultPkgType = "apt" -}}
 {{ end -}}
 {{ $useLinuxBrew := false -}}
 {{ if eq .chezmoi.os "linux" -}}
-{{ $useLinuxBrew = promptBoolOnce . "useLinuxBrew" "Use LinuxBrew" -}}
+{{   $useLinuxBrew = promptBoolOnce . "useLinuxBrew" "Use LinuxBrew" -}}
 {{ end -}}
 
 {{ $brewPrefix := "" -}}
