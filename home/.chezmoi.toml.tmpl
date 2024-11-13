@@ -1,5 +1,6 @@
 {{ $email := promptStringOnce . "email" "Email Address (Git, GPG, etc.)" -}}
 {{ $gitName := promptStringOnce . "gitName" "Name to use for git actions" -}}
+{{ $gitBranchPrefix := promptStringOnce . "gitBranchPrefix" "Prefix to apply to new git branches by default" -}}
 {{ $gitHooksPath := promptStringOnce . "gitHooksPath" "Custom core Git hooks path" -}}
 {{ $gui := promptBoolOnce . "gui" "Enable GUI options" -}}
 {{ $defaultPkgType := "brew" -}}
@@ -31,3 +32,4 @@
     useLinuxBrew = {{ $useLinuxBrew | toToml }}
     tags = {{ get $ "tags" | default list | toToml }}
     brewPrefix = {{ $brewPrefix | toToml }}
+    gitBranchPrefix = {{ $gitBranchPrefix | toToml }}
