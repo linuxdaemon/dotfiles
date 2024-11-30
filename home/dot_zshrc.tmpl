@@ -25,11 +25,17 @@ source {{ joinPath .chezmoi.sourceDir "lib" "common" "functions.sh" | quote }}
 # Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
 # COMPLETION_WAITING_DOTS="true"
 
+{{ if $.gui -}}
+LOCAL_EDITOR='code --wait'
+{{ else -}}
+LOCAL_EDITOR='vim'
+{{ end -}}
+
 # Preferred editor for local and remote sessions
 if [[ -n $SSH_CONNECTION ]]; then
   export EDITOR='vim'
 else
-  export EDITOR='code --wait'
+  export EDITOR="$LOCAL_EDITOR"
 fi
 
 export GIT_EDITOR="$EDITOR"
@@ -70,6 +76,7 @@ brew_add_formula_bin() {
     fi
 }
 
+{{ if eq $.chezmoi.os "darwin" -}}
 # Apple Silicon default brew path
 mbrew_bin="/opt/homebrew/bin/brew"
 
@@ -109,11 +116,18 @@ add_ibrew
 {{ end -}}
 
 unset ibrew_bin mbrew_bin ibrew_default_bin mbrew_default_bin
+{{ else if $.brewPrefix -}}
+eval "$({{ joinPath $.brewPrefix "bin" "brew" | quote }} shellenv zsh)"
+{{ end -}}
 
+{{ if $.brewPrefix -}}
 source "$HOMEBREW_PREFIX/share/antigen/antigen.zsh"
-antigen use oh-my-zsh
-antigen theme agnoster
-antigen apply
+{{ end -}}
+if has_cmd antigen; then
+    antigen use oh-my-zsh
+    antigen theme agnoster
+    antigen apply
+fi
 
 zstyle ':omz:update' mode auto      # update automatically without asking
 
