@@ -8,8 +8,3 @@ alias git-prune-all="git fetch --all && git remote prune origin && git branch -v
 new-branch() {
     git checkout -b "{{ .gitBranchPrefix }}$1"
 }
-
-cdgroot() {
-    local dir="$(git rev-parse --show-toplevel)"
-    [[ -n "$dir" ]] && cd "$dir"
-}

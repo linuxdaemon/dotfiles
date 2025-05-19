@@ -28,3 +28,8 @@ has_cmd() {
 todo() {
     eval $EDITOR "$HOME/Documents/todo.md"
 }
+
+cdgroot() {
+    local dir="$(git rev-parse --show-toplevel)"
+    [[ -n "$dir" ]] && cd "$dir"
+}
