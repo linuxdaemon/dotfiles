@@ -1,0 +1,43 @@
+name: Update chezmoi-install.sh
+
+on:
+  schedule:
+    - cron: '0 3 * * 1' # Every Monday at 03:00 UTC
+  workflow_dispatch:
+
+jobs:
+  update-install-script:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Git user
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Run build-install.sh
+        run: ci/build-install.sh
+
+      - name: Check for changes
+        id: changes
+        run: |
+          git add scripts/chezmoi-install.sh
+          if git diff --cached --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Pull Request
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "Update chezmoi-install.sh"
+          title: "Update chezmoi-install.sh"
+          body: "Automated update of chezmoi-install.sh via scheduled workflow."
+          branch: "update/chezmoi-install-sh"
+          base: ${{ github.ref_name }}
+          labels: "update"
+          reviewers: "linuxdaemon"
