@@ -1,7 +1,7 @@
 {{ if or (eq .chezmoi.os "darwin") (and (eq .chezmoi.os "linux") .useLinuxBrew) -}}
 #!/bin/bash
 
-brew bundle --no-lock --file=/dev/stdin <<EOF
+brew bundle --file=/dev/stdin <<EOF
 {{ range $name, $pkg := .packages -}}
 {{ if mustHas $.chezmoi.os $pkg.platforms -}}
 {{ with dig "overrides" $.chezmoi.os "" $pkg -}}
