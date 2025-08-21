@@ -1,0 +1,14 @@
+{{ if eq .chezmoi.os "linux" -}}
+{{ $packages := list -}}
+{{ range $name, $pkg := (includeTemplate "packages.tmpl" $ | fromYaml) -}}
+{{ if eq $pkg.type "apt" -}}
+{{ $packages = mustAppend $packages $pkg.name -}}
+{{ end -}}
+{{ end -}}
+
+{{ if $packages -}}
+#!/bin/bash
+sudo apt install \
+  {{ join " \\\n  " $packages }}
+{{ end -}}
+{{ end -}}

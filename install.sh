@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-./scripts/chezmoi-install.sh init --apply linuxdaemon
+SCRIPT_URL="https://github.com/linuxdaemon/dotfiles/raw/refs/heads/master/scripts/chezmoi-install.sh"
+
+sh -c "$(curl -fsLS $SCRIPT_URL)" -- init --apply linuxdaemon

@@ -2,18 +2,11 @@
 #!/bin/bash
 
 brew bundle --file=/dev/stdin <<EOF
-{{ range $name, $pkg := .packages -}}
-{{ if mustHas $.chezmoi.os $pkg.platforms -}}
-{{ with dig "overrides" $.chezmoi.os "" $pkg -}}
-{{ $pkg = mustMergeOverwrite $pkg . -}}
-{{ end -}}
-{{ $pkgType := dig "type" $.defaultPkgType $pkg -}}
-{{ $pkgName := dig "name" $name $pkg -}}
-{{ if eq $pkgType "brew" -}}
-brew {{ $pkgName | quote }}
-{{ else if eq $pkgType "cask" -}}
-cask {{ $pkgName | quote }}
-{{ end -}}
+{{ range $name, $pkg := (includeTemplate "packages.tmpl" $ | fromYaml) -}}
+{{ if eq $pkg.type "brew" -}}
+brew {{ $pkg.name | quote }}
+{{ else if eq $pkg.type "cask" -}}
+cask {{ $pkg.name | quote }}
 {{ end -}}
 {{ end -}}
 EOF

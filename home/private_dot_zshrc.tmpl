@@ -120,14 +120,16 @@ unset ibrew_bin mbrew_bin ibrew_default_bin mbrew_default_bin
 eval "$({{ joinPath $.brewPrefix "bin" "brew" | quote }} shellenv zsh)"
 {{ end -}}
 
-{{ if $.brewPrefix -}}
+{{ $linuxAntigenPath := "/usr/share/zsh-antigen/antigen.zsh" -}}
+{{ if stat $linuxAntigenPath -}}
+source {{ quote $linuxAntigenPath }}
+{{ else if $.brewPrefix -}}
 source "$HOMEBREW_PREFIX/share/antigen/antigen.zsh"
 {{ end -}}
-if has_cmd antigen; then
-    antigen use oh-my-zsh
-    antigen theme agnoster
-    antigen apply
-fi
+
+antigen use oh-my-zsh
+antigen theme agnoster
+antigen apply
 
 zstyle ':omz:update' mode auto      # update automatically without asking
 
@@ -147,7 +149,7 @@ fi
 # Krew
 add_to_path "${KREW_ROOT:-$HOME/.krew}/bin"
 
-{{ template "includeIfExists.tmpl" (joinPath $.chezmoi.homeDir ".zshrc.local") -}}
+{{ includeTemplate "includeIfExists.tmpl" (joinPath $.chezmoi.homeDir ".zshrc.local") -}}
 
 # We finished init, set up completions (OMZ does this above, but we add our own, so do it again)
 autoload -Uz compinit

@@ -1,0 +1,16 @@
+packageOverrides:
+  antigen:
+    apt:
+      name: zsh-antigen
+  font-hack:
+    darwin:
+      type: cask
+  iterm2:
+    darwin:
+      type: cask
+  visual-studio-code:
+    darwin:
+      type: cask
+  yq:
+    linux:
+      type: brew

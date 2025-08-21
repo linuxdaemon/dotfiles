@@ -10,9 +10,6 @@ packages:
   iterm2:
     platforms:
       - darwin
-    overrides:
-      darwin:
-        type: cask
     guiOnly: true
   jq:
     platforms:
@@ -22,9 +19,6 @@ packages:
     platforms:
       - darwin
       - linux
-    overrides:
-      darwin:
-        type: cask
     guiOnly: true
   yq:
     platforms:
@@ -41,9 +35,6 @@ packages:
     platforms:
       - darwin
       - linux
-    overrides:
-      darwin:
-        type: cask
     guiOnly: true
   direnv:
     platforms:

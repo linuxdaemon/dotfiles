@@ -1,0 +1,20 @@
+{{ $packages := dict -}}
+{{ range $name, $pkg := $.packages -}}
+{{ $guiOnly := dig "guiOnly" false $pkg -}}
+{{ if and (mustHas $.chezmoi.os $pkg.platforms) (or ($.gui) (not $guiOnly)) -}}
+{{ $pkgDefaults := dict "type" $.defaultPkgType "name" $name -}}
+{{ $pkg = mustMergeOverwrite $pkgDefaults $pkg -}}
+
+{{ with dig $name "" $.packageOverrides -}}
+{{ with dig $.chezmoi.os "" . -}}
+{{ $pkg = mustMergeOverwrite $pkg . -}}
+{{ end -}}
+{{ with dig $pkg.type "" . -}}
+{{ $pkg = mustMergeOverwrite $pkg . -}}
+{{ end -}}
+{{ end -}}
+{{ $packages = set $packages $name $pkg -}}
+{{ end -}}
+{{ end -}}
+
+{{ toYaml $packages -}}
