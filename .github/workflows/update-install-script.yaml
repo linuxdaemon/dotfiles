@@ -20,18 +20,7 @@ jobs:
       - name: Run build-install.sh
         run: ci/build-install.sh
 
-      - name: Check for changes
-        id: changes
-        run: |
-          git add scripts/chezmoi-install.sh
-          if git diff --cached --quiet; then
-            echo "changed=false" >> $GITHUB_OUTPUT
-          else
-            echo "changed=true" >> $GITHUB_OUTPUT
-          fi
-
       - name: Create Pull Request
-        if: steps.changes.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7
         with:
           commit-message: "Update chezmoi-install.sh"
@@ -41,3 +30,4 @@ jobs:
           base: ${{ github.ref_name }}
           labels: "update"
           reviewers: "linuxdaemon"
+          sign-commits: true
