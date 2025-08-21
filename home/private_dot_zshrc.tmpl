@@ -47,7 +47,7 @@ source_if_exists .aliases
 test -e "$HOME/.iterm2_shell_integration.zsh" && source "$HOME/.iterm2_shell_integration.zsh"
 {{ end -}}
 
-{{ if has "personal" $.tags -}}
+{{ if eq $.machineType "personal" -}}
 hash -d Documents="$HOME/Library/CloudStorage/SynologyDrive-1/Documents"
 hash -d Code="$HOME/Library/CloudStorage/SynologyDrive-1/Documents/Code"
 {{ end -}}
