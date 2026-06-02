@@ -37,8 +37,10 @@ ohmyzsh/ohmyzsh path:lib
 #ohmyzsh/ohmyzsh path:plugins/rails
 
 # Add macOS specific plugins
-ohmyzsh/ohmyzsh path:plugins/brew conditional:is-macos
-ohmyzsh/ohmyzsh path:plugins/macos conditional:is-macos
+#ohmyzsh/ohmyzsh path:plugins/brew conditional:is-macos
+#ohmyzsh/ohmyzsh path:plugins/macos conditional:is-macos
+
+{{ joinPath .chezmoi.sourceDir "plugins" "brew" | quote }}
 
 # Add binary utils
 #romkatv/zsh-bench kind:path
