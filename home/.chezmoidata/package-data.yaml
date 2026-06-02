@@ -1,7 +1,4 @@
 packageOverrides:
-  antigen:
-    apt:
-      name: zsh-antigen
   font-hack:
     darwin:
       type: cask
@@ -12,5 +9,8 @@ packageOverrides:
     darwin:
       type: cask
   yq:
+    linux:
+      type: brew
+  pipx:
     linux:
       type: brew

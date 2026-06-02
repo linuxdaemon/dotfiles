@@ -40,7 +40,3 @@ packages:
     platforms:
       - darwin
       - linux
-  antigen:
-    platforms:
-      - darwin
-      - linux

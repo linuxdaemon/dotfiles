@@ -1,3 +1,4 @@
+setopt extended_glob
 source {{ joinPath .chezmoi.sourceDir "lib" "common" "functions.sh" | quote }}
 
 # Uncomment the following line to use case-sensitive completion.
@@ -24,6 +25,7 @@ source {{ joinPath .chezmoi.sourceDir "lib" "common" "functions.sh" | quote }}
 # e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
 # Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
 # COMPLETION_WAITING_DOTS="true"
+ZSH_THEME=agnoster
 
 {{ if $.gui -}}
 LOCAL_EDITOR='code --wait'
@@ -120,18 +122,33 @@ unset ibrew_bin mbrew_bin ibrew_default_bin mbrew_default_bin
 eval "$({{ joinPath $.brewPrefix "bin" "brew" | quote }} shellenv zsh)"
 {{ end -}}
 
-{{ $linuxAntigenPath := "/usr/share/zsh-antigen/antigen.zsh" -}}
-{{ if stat $linuxAntigenPath -}}
-source {{ quote $linuxAntigenPath }}
-{{ else if $.brewPrefix -}}
-source "$HOMEBREW_PREFIX/share/antigen/antigen.zsh"
-{{ end -}}
+# Lazy-load (autoload) Zsh function files from a directory.
+ZFUNCDIR=${ZDOTDIR:-$HOME}/.zfunctions
+fpath=($ZFUNCDIR $fpath)
+autoload -Uz $ZFUNCDIR/*(.:t)
 
-antigen use oh-my-zsh
-antigen theme agnoster
-antigen apply
+# Set any zstyles you might use for configuration.
+[[ ! -f ${ZDOTDIR:-$HOME}/.zstyles ]] || source ${ZDOTDIR:-$HOME}/.zstyles
 
-zstyle ':omz:update' mode auto      # update automatically without asking
+# Clone antidote if necessary.
+if [[ ! -d ${ZDOTDIR:-$HOME}/.antidote ]]; then
+  git clone https://github.com/mattmc3/antidote ${ZDOTDIR:-$HOME}/.antidote
+fi
+
+# Create an amazing Zsh config using antidote plugins.
+source ${ZDOTDIR:-$HOME}/.antidote/antidote.zsh
+antidote load
+
+# Source anything in .zshrc.d.
+#for _rc in ${ZDOTDIR:-$HOME}/.zshrc.d/*.zsh; do
+  # Ignore tilde files.
+#  if [[ $_rc:t != '~'* ]]; then
+#    source "$_rc"
+#  fi
+#done
+#unset _rc
+
+#zstyle ':omz:update' mode auto      # update automatically without asking
 
 if has_cmd brew; then
     gcloud_dir="$HOMEBREW_PREFIX/share/google-cloud-sdk"
