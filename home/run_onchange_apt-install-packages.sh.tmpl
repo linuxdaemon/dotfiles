@@ -1,4 +1,4 @@
-{{ if eq .chezmoi.os "linux" -}}
+{{/* if eq .chezmoi.os "linux" -}}
 {{ $packages := list -}}
 {{ range $name, $pkg := (includeTemplate "packages.tmpl" $ | fromYaml) -}}
 {{ if eq $pkg.type "apt" -}}
@@ -11,4 +11,4 @@
 sudo apt install \
   {{ join " \\\n  " $packages }}
 {{ end -}}
-{{ end -}}
+{{ end */ -}}

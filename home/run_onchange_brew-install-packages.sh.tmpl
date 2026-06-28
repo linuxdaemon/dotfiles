@@ -1,4 +1,4 @@
-{{ if or (eq .chezmoi.os "darwin") (and (eq .chezmoi.os "linux") .useLinuxBrew) -}}
+{{/* if or (eq .chezmoi.os "darwin") (and (eq .chezmoi.os "linux") .useLinuxBrew) -}}
 #!/bin/bash
 
 brew bundle --file=/dev/stdin <<EOF
@@ -10,4 +10,4 @@ cask {{ $pkg.name | quote }}
 {{ end -}}
 {{ end -}}
 EOF
-{{ end -}}
+{{ end */ -}}
