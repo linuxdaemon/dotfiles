@@ -78,50 +78,6 @@ brew_add_formula_bin() {
     fi
 }
 
-{{ if eq $.chezmoi.os "darwin" -}}
-# Apple Silicon default brew path
-mbrew_bin="/opt/homebrew/bin/brew"
-
-# Intel default brew path
-ibrew_default_bin="/usr/local/bin/brew"
-
-# Alternate install location for x86 brew on Apple Silicon mac
-ibrew_alt_bin="/usr/local/homebrew/bin/brew"
-
-if [ -x "$ibrew_default_bin" ]; then
-    ibrew_bin= "$ibrew_default_bin"
-else
-    ibrew_bin="$ibrew_alt_bin"
-fi
-
-add_ibrew() {
-    if [ -x "$ibrew_bin" ]; then
-        alias ibrew="arch -x86_64 $ibrew_bin"
-        eval "$(ibrew shellenv zsh)"
-        export FPATH="$HOMEBREW_PREFIX/share/zsh/site-functions${FPATH+:$FPATH}"
-    fi
-}
-
-add_mbrew() {
-    if [ -x "$mbrew_bin" ]; then
-        alias mbrew="arch -arm64e $mbrew_bin"
-        eval "$(mbrew shellenv zsh)"
-        export FPATH="$HOMEBREW_PREFIX/share/zsh/site-functions${FPATH+:$FPATH}"
-    fi
-}
-
-{{ if eq $.chezmoi.arch "arm64" -}}
-add_ibrew
-add_mbrew
-{{ else -}}
-add_ibrew
-{{ end -}}
-
-unset ibrew_bin mbrew_bin ibrew_default_bin mbrew_default_bin
-{{ else if $.brewPrefix -}}
-eval "$({{ joinPath $.brewPrefix "bin" "brew" | quote }} shellenv zsh)"
-{{ end -}}
-
 # Lazy-load (autoload) Zsh function files from a directory.
 ZFUNCDIR=${ZDOTDIR:-$HOME}/.zfunctions
 fpath=($ZFUNCDIR $fpath)

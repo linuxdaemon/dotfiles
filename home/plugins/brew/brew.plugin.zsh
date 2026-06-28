@@ -39,10 +39,6 @@ typeset -a _cache_files=($_cache_dir/brew.zsh(Nmh-20))
 (( $#_cache_files )) ||
   $_brewcmd shellenv >| $_cache_dir/brew.zsh
 
-# load plugin functions
-fpath=(${0:A:h}/functions $fpath)
-autoload -U $fpath[1]/*(.:t)
-
 #
 # Wrap up
 #
