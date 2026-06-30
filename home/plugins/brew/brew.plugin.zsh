@@ -39,6 +39,8 @@ typeset -a _cache_files=($_cache_dir/brew.zsh(Nmh-20))
 (( $#_cache_files )) ||
   $_brewcmd shellenv >| $_cache_dir/brew.zsh
 
+source $_cache_dir/brew.zsh
+
 #
 # Wrap up
 #
